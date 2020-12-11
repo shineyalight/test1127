@@ -61,7 +61,9 @@ sales_by_cat_2_tbl %>%
   scale_x_continuous(labels = scales::dollar_format()) +
   theme_tq() +
   expand_limits(x = 0)
+```
 
+```{r}
 plot_sales <- function(data) { 
   data %>%
     ggplot(aes(x = sales, y = category_2)) +
@@ -73,44 +75,52 @@ plot_sales <- function(data) {
 }
 
 sales_by_cat_2_tbl %>% plot_sales()
+```
 
 # 3.0 Forcats Basics ----
 # 3.1 Inspecting Factors ----
 
 # Vector
 
+```{r}
 sales_by_cat_2_tbl %>% pull(category_2)
-
-
+```
 # Tibble
-
+```{r}
 sales_by_cat_2_tbl %>%
   mutate(category_2 = category_2 %>% fct_rev() %>% fct_rev())
 
 sales_by_cat_2_tbl %>% pull(category_2) %>% levels()
 
 sales_by_cat_2_tbl %>% pull(category_2) %>% as.numeric()
+```
 
 # Tibble
 
+```{r}
 sales_by_cat_2_tbl %>%
   mutate(category_2 = category_2 %>% fct_rev() %>% fct_rev()) %>%
   mutate(
     label = category_2 %>% as.character(),
     value = category_2 %>% as.numeric()
   )
+```
 
 # 3.2 Creating Factors: as_factor() vs as.factor() ----
 # as.factor() - alphabetical order
 
+```{r}
 sales_by_cat_2_tbl %>%
   mutate(
     category_2           = as.character(category_2),
     category_2_as_factor = as_factor(category_2) %>% as.numeric(),
     category_2_as.factor = as.factor(category_2) %>% as.numeric()
   )
+```
 
 # 3.3 Reordering Factors: fct_reorder() and fct_rev() ----
+
+```{r}
 sales_by_cat_2_tbl %>%
   arrange(desc(sales)) %>%
   mutate(sales_negative = -sales) %>%
@@ -120,9 +130,11 @@ sales_by_cat_2_tbl %>%
     ) %>%
   
   plot_sales()
+```
 
 # 3.4 Time-Based Reordering: fct_reorder2() ----
 
+```{r}
 sales_by_cat_2_q_tbl <- bike_orderlines_tbl %>%
   mutate(order_date = order_date %>% floor_date("quarter") %>% ymd())%>%
   group_by(category_2, order_date)%>%
@@ -130,9 +142,10 @@ sales_by_cat_2_q_tbl <- bike_orderlines_tbl %>%
   ungroup()
 
 sales_by_cat_2_q_tbl
-
+```
 #fct_reorder2　ｔｉｍｅ　ｓｅｒｉｅｓ
 
+```{r}
 sales_by_cat_2_q_tbl %>%
   mutate(category_2 = category_2 %>% fct_reorder2(order_date, sales)) %>%
   ggplot(aes(x = order_date, y = sales, color = category_2)) +
@@ -143,9 +156,11 @@ sales_by_cat_2_q_tbl %>%
   facet_wrap(~ category_2) +
   
   scale_y_continuous(labels = scales::dollar_format(scale = 1e-6, suffix = "M"))
+```
 
 # 3.5 Creating "Other" Category - fct_lump() & fct_relevel() ----
 
+```{r}
 sales_by_cat_2_tbl %>%
   
   mutate(category_2 = category_2 %>% fct_lump(n = 6, 
@@ -158,3 +173,4 @@ sales_by_cat_2_tbl %>%
   mutate(category_2 = category_2 %>% fct_relevel("All Other Bike Categories", after = 0)) %>%
   
   plot_sales()
+```
