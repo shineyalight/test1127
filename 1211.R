@@ -1,0 +1,109 @@
+# CATEGORICAL DATA MANIPULATION ----
+
+# 1.0 Factor Basics ----
+
+# What is a Factor?
+# A way of managing categorical data
+
+# Why do we want factors? 
+# 1. Can group numeric values into bin (think price = low, medium, high)
+# 2. Can reorder categories for visualization (fct_reorder)
+# 3. Can manipulate categories much eaiser (fct_lump)
+# 4. Machine learning and modeling algorithms may require factor data type for categorical data. 
+
+rm(list=ls())
+install.packages("pacman")
+pacman::p_load(tidyverse, lubridate, tidyquant)
+pacman::p_load(timetk)
+library(pacman)
+library(tidyverse)
+library(lubridate)
+library(tidyquant)
+
+bike_orderlines_tbl <- readRDS("bike_orderlines.rds")
+
+# 2.0 Motivating Example -----
+#Manipulation
+
+sales_by_cat_2_tbl <- bike_orderlines_tbl %>%
+  select(category_2, total_price) %>%
+  group_by(category_2) %>%
+  summarise(sales=sum(total_price)) %>%
+  ungroup() %>%
+  
+  arrange(desc(sales)) %>%
+  mutate(category_2 = category_2 %>% as_factor(),
+         value      = as.numeric(category_2))
+      
+# Plotting
+sales_by_cat_2_tbl %>%
+  ggplot(aes(x = sales, y = category_2)) +
+  geom_point(size = 5, color = "red") +
+  labs(title = "Sales By Category 2") +
+  scale_x_continuous(labels = scales::dollar_format()) +
+  theme_tq() +
+  expand_limits(x = 0)
+
+plot_sales <- function(data) { 
+  data %>%
+    ggplot(aes(x = sales, y = category_2)) +
+    geom_point(size = 5, color = "red") +
+    labs(title = "Sales By Category 2") +
+    scale_x_continuous(labels = scales::dollar_format()) +
+    theme_tq() +
+    expand_limits(x = 0)
+}
+
+sales_by_cat_2_tbl %>% plot_sales()
+
+# 3.0 Forcats Basics ----
+# 3.1 Inspecting Factors ----
+
+# Vector
+
+sales_by_cat_2_tbl %>% pull(category_2)
+
+
+# Tibble
+
+sales_by_cat_2_tbl %>%
+  mutate(category_2 = category_2 %>% fct_rev() %>% fct_rev())
+
+sales_by_cat_2_tbl %>% pull(category_2) %>% levels()
+
+sales_by_cat_2_tbl %>% pull(category_2) %>% as.numeric()
+
+# Tibble
+
+sales_by_cat_2_tbl %>%
+  mutate(category_2 = category_2 %>% fct_rev() %>% fct_rev()) %>%
+  mutate(
+    label = category_2 %>% as.character(),
+    value = category_2 %>% as.numeric()
+  )
+
+# 3.2 Creating Factors: as_factor() vs as.factor() ----
+# as.factor() - alphabetical order
+
+sales_by_cat_2_tbl %>%
+  mutate(
+    category_2           = as.character(category_2),
+    category_2_as_factor = as_factor(category_2) %>% as.numeric(),
+    category_2_as.factor = as.factor(category_2) %>% as.numeric()
+  )
+
+# 3.3 Reordering Factors: fct_reorder() and fct_rev() ----
+
+sales_by_cat_2_tbl %>%
+  arrange(desc(sales)) %>%
+  mutate(sales_negative = -sales) %>%
+  mutate(
+    category_2 = category_2 %>% fct_reorder(sales_negative),
+    values     = category_2 %>% as.numeric()) %>%
+  
+  plot_sales()
+
+
+
+
+
