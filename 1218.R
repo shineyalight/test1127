@@ -39,7 +39,7 @@ revenue_by_month %>%
   geom_line(size = 0.5, linetype = 1) +
   geom_smooth(method = 'loess', span = 0.2)
 
-# Bar plot: category_2 vs. revenue
+# Bar plot: category_2 vs. revenue (order from largest to smallest)
 
 revenue_by_category_2 <- bike_orderlines_tbl %>% 
   select(category_2, total_price) %>% 
@@ -48,7 +48,7 @@ revenue_by_category_2 <- bike_orderlines_tbl %>%
   ungroup()
 
 revenue_by_category_2 %>% 
-  mutate(category_2 = category_2 %>% as_factor()) %>%
+  mutate(category_2 = category_2 %>% as_factor() %>% fct_reorder(revenue)) %>%
   ggplot(aes(category_2, revenue)) +
   geom_col(fill = 'coral') +
   coord_flip()
