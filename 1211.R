@@ -140,3 +140,46 @@ sales_by_cat_2_tbl %>%
   mutate(category_2 = category_2 %>% fct_relevel("All Other Bike Categories", after = 0)) %>%
   
   plot_sales()
+
+
+
+
+library(tidyverse)
+library(lubridate)
+
+
+glimpse(bike_orderlines_tbl)
+
+
+# 1.0 Anatomy of a ggplot ----
+
+# 1.1 How ggplot works ----
+
+# Step 1: Format data ----
+revenue_by_year_tbl <- bike_orderlines_tbl %>%
+  select(order_date, total_price) %>%
+  mutate(year = year(order_date)) %>%
+  
+  group_by(year) %>%
+  summarize(revenue = sum(total_price)) %>%
+  ungroup()
+
+revenue_by_year_tbl
+
+
+# Step 2: Plot ----
+
+g <- revenue_by_year_tbl %>%
+  
+  # Canvas
+  ggplot(aes(x = year, y = revenue, color = revenue)) +
+  
+  # Geometries 
+  geom_line(size = 1) +
+  geom_point(size = 5) +
+  geom_smooth(method = "lm", se = FALSE) +
+  
+  # Formatting
+  expand_limits(y = 0) +
+  scale_color_continuous(low = "red", high = "black",
+                         labels = scales::dollar_format(scale = 1/1e6, suffix = "M")) +

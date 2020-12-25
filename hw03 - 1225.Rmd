@@ -1,0 +1,51 @@
+---
+title: "hw03"
+author: "Gankhuyag Enkhjin"
+date: "12/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list=ls())
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+d_funds_type <- tibble(
+  type = c("Fund A", "Fund B", "Fund C"),
+  freq = c(16, 4, 5)
+)
+knitr::kable(d_funds_type)
+```
+
+```{r}
+# Plot Barchart
+
+d_funds_type %>% 
+  ggplot(aes(type, freq)) +
+  geom_col(fill = "dark gray")
+```
+
+```{r}
+# Barchart in descending order:
+
+d_funds_type %>% 
+  mutate(type = fct_reorder(type, desc(freq))) %>% 
+  ggplot(aes(type,freq)) +
+  geom_col(fill = 'dark grey')
+```
+
+```{r}
+# Barchart in flip coordinates:
+
+d_funds_type %>% 
+  mutate(type = fct_reorder(type, desc(freq))) %>% 
+  ggplot(aes(type,freq)) +
+  geom_col(fill = 'dark grey') +
+  coord_flip()
+```
