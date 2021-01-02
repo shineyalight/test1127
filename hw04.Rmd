@@ -1,0 +1,104 @@
+---
+title: "hw04"
+author: "Gankhuyag Enkhjin"
+date: "1/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list=ls())
+library(tidyverse)
+library(ggplot2)
+library(scales)
+```
+
+```{r}
+mat_comm <- matrix(
+  c(9, 10, 13, 4,
+    18, 7, 8, 11),
+  nrow=4, ncol=2,
+  dimnames = list(c("A Community", "B Community", "C Community", "D Community"), c("male", "female"))
+)
+knitr::kable(mat_comm)
+```
+
+```{r}
+d_comm <- as.data.frame(as.table(mat_comm))
+names(d_comm) <- c("community", "sex", "freq")
+knitr::kable(d_comm)
+```
+
+```{r}
+# Q1: Plot Barchart by sex.
+d_comm %>% 
+ggplot(aes(x = sex, y = freq, fill = community)) +
+  geom_col()
+```
+
+```{r}
+# Q2: Plot Barchart by community.
+d_comm %>% 
+ggplot(aes(x = community, y = freq, fill = sex)) +
+  geom_col()
+```
+
+```{r}
+# Q3: Plot Barchart by using dodge. (Hint: position = ‘dodge’).
+d_comm %>% 
+ggplot(aes(y = freq, x = sex, fill = community)) +
+  geom_bar(position = "dodge", stat = "identity")
+```
+
+```{r}
+# Q4: Plot Barchart with text.
+# (Hint: Compute percentage, use geom_text() to create text, and sprintf() to set up format for percentage.)
+# Couldn't compute the percentages!
+
+vec <- c(0.33, 0.59, 0.62, 0.27, 0.67, 0.41, 0.38, 0.73)                 
+d_comm$percentage <- percent(vec)
+
+d_comm %>% 
+  ggplot(aes(x = community, y = percentage, fill = sex)) +
+  geom_col() +
+  geom_text(aes(y = percentage, label = percentage), vjust = 1.6, color = "black")
+```
+
+```{r}
+# Q5: Using iris data, plot the box plot of sepal length across species.
+data(iris)
+summary(iris)
+
+iris_by_species <- iris %>% 
+  select (Species, Sepal.Length) %>% 
+  distinct() %>% 
+  mutate(Species = as_factor(Species) %>% 
+           fct_reorder(Sepal.Length))
+
+iris_by_species %>% 
+  ggplot(aes(Sepal.Length, Species)) +
+  geom_boxplot() +
+  coord_flip()
+```
+
+```{r}
+# Q6: Plot histogram and density curve of sepal width.
+hist(iris$Sepal.Width, breaks = 13, probability = T, xlim = c(2.0, 4.5), ylim = c(0.0, 1.2), col = "blue", xlab = "Sepal Width", main = "Histogram & Density Curve of Sepal Width")
+lines(density(iris$Sepal.Width), col = "black", lwd = 2)
+
+ggplot(iris, aes(x=Sepal.Width)) +
+  geom_histogram(aes(y =..density..), colour = "black", fill = "blue") +
+  geom_density(alpha=0.2, fill = "blue") 
+```
+
+```{r}
+# Q7: Plot density curves of sepal length.
+iris %>% 
+  ggplot(aes(x=Sepal.Length, fill=Species)) +
+  geom_density(alpha = 0.2)
+```
+
+
