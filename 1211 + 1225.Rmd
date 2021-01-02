@@ -1,0 +1,146 @@
+---
+title: "1218 + 1225"
+author: "Gankhuyag Enkhjin"
+date: "1/2/2021"
+output: html_document
+---
+
+```{r}
+rm(list=ls())
+library(forcats)
+library(tidyverse)
+library(tidyquant)
+
+bike_orderlines_tbl <- readRDS("bike_orderlines.rds")
+```
+
+# 1.2 What is a ggplot?
+
+g
+
+view(g)
+
+```{r}
+# scatter plot: quantity vs. total price
+
+order_value_tbl <- bike_orderlines_tbl %>%
+  select(order_id, order_line, total_price, quantity) %>%
+  group_by(order_id)%>%
+  summarise(
+    total_quantity = sum(quantity),
+    total_price    = sum(total_price)) %>%
+  ungroup() 
+
+order_value_tbl %>%
+  ggplot(aes(x = total_quantity, y = total_price)) +
+  geom_point(alpha = 0.5, size = 2) +
+  geom_smooth(method = 'lm', se = FALSE)
+```
+
+```{r}
+# Line plot: plot total price vs. year month
+revenue_by_month <- bike_orderlines_tbl %>% 
+  select(order_date, total_price) %>%
+  mutate(year_month = floor_date(order_date, "months") %>% ymd()) %>% 
+  group_by(year_month) %>% 
+  summarise(revenue = sum(total_price)) %>% 
+  ungroup()
+
+revenue_by_month %>% 
+  ggplot(aes(year_month, revenue)) +
+  geom_line(size = 0.5, linetype = 1) +
+  geom_smooth(method = 'loess', span = 0.2)
+```
+
+```{r}
+# Bar plot: category_2 vs. revenue (order from largest to smallest)
+
+revenue_by_category_2 <- bike_orderlines_tbl %>% 
+  select(category_2, total_price) %>% 
+  group_by(category_2) %>% 
+  summarise(revenue = sum(total_price)) %>% 
+  ungroup()
+
+revenue_by_category_2 %>% 
+  mutate(category_2 = category_2 %>% as_factor() %>% fct_reorder(revenue)) %>%
+  ggplot(aes(category_2, revenue)) +
+  geom_col(fill = 'coral') +
+  coord_flip()
+```
+
+```{r}
+# Histogram, based on price range: plot price histogram. 
+# distinct how many models there are
+# ggplot how many models fall on the same price range
+# bins = more bar plots, color = bar outline color
+
+bike_orderlines_tbl %>%
+  select(price, model) %>% 
+  distinct() %>% 
+  ggplot(aes(x = price)) +
+  geom_histogram(bins = 50, fill = 'gray', color = 'white')
+```
+
+```{r}
+# Unit price of bicycle, segmenting by frame material
+# histogram
+
+bike_orderlines_tbl %>% 
+  distinct (price, model, frame_material) %>% 
+  ggplot(aes(price, fill = frame_material)) +
+  geom_histogram() +
+  facet_wrap(~frame_material, ncol = 2) +
+  scale_fill_tq() +
+  theme_tq()
+```
+
+```{r}
+# Density
+
+bike_orderlines_tbl %>% 
+  distinct (price, model, frame_material) %>% 
+  ggplot(aes(price, fill = frame_material)) +
+  geom_density(alpha = 0.7)+
+  scale_fill_tq() +
+  theme_tq()+
+  theme(legend.position = "top")
+```
+
+```{r}
+# Box plot (turn to factor, reorder the price)
+
+unit_price_by_cat2_tbl <- bike_orderlines_tbl %>% 
+  select (category_2, model, price) %>% 
+  distinct() %>% 
+  mutate(category_2 = as_factor(category_2) %>% 
+                      fct_reorder(price))
+
+unit_price_by_cat2_tbl %>% 
+  ggplot(aes(category_2, price)) +
+  geom_boxplot() +
+  coord_flip() +
+  theme_tq()
+```
+
+```{r}
+# Add text and labels to plots
+
+revenue_by_year <- bike_orderlines_tbl %>% 
+  select(order_date, total_price) %>% 
+  mutate(year = year(order_date)) %>% 
+  group_by(year) %>% 
+  summarize(revenue = sum(total_price)) %>% 
+  ungroup()
+
+revenue_by_year %>%
+  ggplot(aes(year, revenue)) +
+  geom_bar(fill = "red") +
+  geom_smooth(method = 'lm', se = FALSE) +
+  geom_text(aes(label = scales::dollar(revenue,
+                                       scale = 1e-6,
+                                       suffix = "M")),
+            color = 'black'
+            vjust = 1.5) +
+  geom_label(label = "Major Demand This Year",
+             vjust = -0.5)
+```
