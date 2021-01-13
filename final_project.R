@@ -92,16 +92,21 @@ print(red_plot + labs(title= "The ten largest market capitalization stocks in TW
                       y="Market share %", x = "id"))
 
 # Q10. Plot the density of the 5 largest market cap stock monthly returns from 2017-2018.
-
-main_tbl %>% 
+  
+by_date <- main_tbl[main_tbl$date >= "2017-01-01" & main_tbl$date <= "2018-12-31",]
+ 
+by_date %>% 
   select(id, date, Market.Cap.) %>% 
-  arrange(desc(Market.Cap.)) %>% 
-  group_by(id) %>% 
+  group_by(Market.Cap.) %>% 
+  arrange(desc(Market.Cap.)) %>%
+  mutate(year_month = floor_date(date, "months") %>% ymd()) %>% 
+  group_by(year_month) %>%
+  
   summarise(Market.Cap. = sum(Market.Cap)) %>% 
-head(5) %>% 
   ggplot(aes(x = monthly returns, fill = asset)) +
   geom_density(alpha = 0.2)
 
+glimpse(top_10)
 
 
 
